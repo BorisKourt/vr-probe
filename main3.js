@@ -1,3 +1,7 @@
+import * as THREE from './build/three.module.js';
+import { VRButton } from './jsm/webxr/VRButton.js';
+import { OBJLoader } from './jsm/loaders/OBJLoader.js';
+
 var camera, scene, renderer, container, textureEquirec, equirectMaterial, cube_map;
 var cube_object;
 
@@ -159,7 +163,7 @@ animate();
 var ta, tb, tc;
 
 function init() {
-  var loader = new THREE.OBJLoader();
+  var loader = new OBJLoader();
 
   var textureLoader = new THREE.TextureLoader();
 
@@ -197,18 +201,12 @@ function init() {
   var canvas = document.createElement( 'canvas' );
   canvas.style.position = "absolute";
 
-  var context = canvas.getContext( 'webgl2', {
-    antialias: false,
-    alpha: false,
-    xrCompatible: true } );
+  var context = canvas.getContext( 'webgl2', { antialias: false, alpha: false } );
   renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
 
   renderer.setPixelRatio( window.devicePixelRatio );
   renderer.setSize( window.innerWidth, window.innerHeight );
-  renderer.gammaInput = true;
-  renderer.gammaOutput = true;
-  renderer.shadowMap.enabled = false;
-  renderer.vr.enabled = true;
+  renderer.xr.enabled = true;
   container.appendChild( renderer.domElement );
 
   canvases[0].canvas_texture = new THREE.CanvasTexture(canvases[0].can);
@@ -269,17 +267,17 @@ function init() {
 
   var geometry2 = new THREE.SphereBufferGeometry( 100, 60, 40 );
 
-  cubeMesh = new THREE.Mesh( geometry2, equirectMaterial );
+  var cubeMesh = new THREE.Mesh( geometry2, equirectMaterial );
   cubeMesh.material = equirectMaterial;
   cubeMesh.visible = true;
   scene.add(cubeMesh);
 
   for (var i = 0; i < canvases.length ; i++) {
 
-    angle = (i / (canvases.length/2)) * Math.PI / 1.2;
-    x = (1.6 * Math.cos(angle)) ;
-    z = (1.6 * Math.sin(angle)) ;
-    y = 2;
+    var angle = (i / (canvases.length/2)) * Math.PI / 1.2;
+    var x = (1.6 * Math.cos(angle)) ;
+    var z = (1.6 * Math.sin(angle)) ;
+    var y = 2;
 
     var drop_group = new THREE.Group();
 
@@ -376,10 +374,10 @@ function init() {
 
   for (var i = 0; i < canvases.length ; i++) {
 
-    angle = (i / (canvases.length/2)) * Math.PI / 1.2;
-    x = (1.8 * Math.cos(angle)) ;
-    z = (1.8 * Math.sin(angle)) ;
-    y = 1.3;
+    var angle = (i / (canvases.length/2)) * Math.PI / 1.2;
+    var x = (1.8 * Math.cos(angle)) ;
+    var z = (1.8 * Math.sin(angle)) ;
+    var y = 1.3;
 
     var tg = new THREE.BoxBufferGeometry(0.8, 0.8, 0.8);
     var tm = new THREE.MeshBasicMaterial({color: 0x101000});
@@ -452,10 +450,10 @@ function init() {
 
     dragger.add(obj);
 
-    angle = (i / (styles.length/2)) * Math.PI; // Calculate the angle at which the element will be placed.
+    var angle = (i / (styles.length/2)) * Math.PI; // Calculate the angle at which the element will be placed.
     // For a semicircle, we would use (i / numNodes) * Math.PI.
-    x = (2 * Math.cos(angle)); // Calculate the x position of the element.
-    z = (2 * Math.sin(angle)); // Calculate the y position of the element.
+    var x = (2 * Math.cos(angle)); // Calculate the x position of the element.
+    var z = (2 * Math.sin(angle)); // Calculate the y position of the element.
 
     dragger.position.x = x;
     dragger.position.y = -0.5;
@@ -469,14 +467,14 @@ function init() {
 
   }
 
-  document.body.appendChild( THREE.WEBVR.createButton( renderer ) );
+  document.body.appendChild( VRButton.createButton( renderer ) );
 
-  controller1 = renderer.vr.getController( 0 );
+  controller1 = renderer.xr.getController( 0 );
   controller1.addEventListener( 'selectstart', onSelectStart );
   controller1.addEventListener( 'selectend', onSelectEnd );
   scene.add( controller1 );
 
-  controller2 = renderer.vr.getController( 1 );
+  controller2 = renderer.xr.getController( 1 );
   controller2.addEventListener( 'selectstart', onSelectStart );
   controller2.addEventListener( 'selectend', onSelectEnd );
   scene.add( controller2 );
