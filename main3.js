@@ -677,7 +677,7 @@ function render() {
     }
 
     for (var i = 0; i < canvases.length; i++) {
-      if (canvases[i].current != canvases[i].next) {
+      if (canvases[i].images[canvases[i].next].complete && canvases[i].current != canvases[i].next) {
 
         canvases[i].frame++;
 
@@ -689,9 +689,9 @@ function render() {
           canvases[i].con.globalAlpha = 0.09;
         }
 
-        canvases[i].con.drawImage(canvases[i].images[canvases[i].next], 0, 0);
-        canvases[i].canvas_texture.needsUpdate = true;
-      }
+          canvases[i].con.drawImage(canvases[i].images[canvases[i].next], 0, 0);
+          canvases[i].canvas_texture.needsUpdate = true;
+        }
     }
 
   }
