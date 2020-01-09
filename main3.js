@@ -200,8 +200,7 @@ function init() {
   var context = canvas.getContext( 'webgl2', {
     antialias: false,
     alpha: false,
-    xrCompatible: true,
-    premultipliedAlpha: true} );
+    xrCompatible: true } );
   renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
 
   renderer.setPixelRatio( window.devicePixelRatio );
