@@ -1,6 +1,6 @@
-import * as THREE from 'build/three.module.js';
-import { VRButton } from 'jsm/webxr/VRButton.js';
-import { OBJLoader } from 'jsm/loaders/OBJLoader.js';
+import * as THREE from './vr-probe/build/three.module.js';
+import { VRButton } from './vr-probe/jsm/webxr/VRButton.js';
+import { OBJLoader } from './vr-probe/jsm/loaders/OBJLoader.js';
 
 var camera, scene, renderer, container, textureEquirec, equirectMaterial, cube_map;
 var cube_object;
