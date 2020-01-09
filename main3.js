@@ -30,30 +30,6 @@ var targetVector = new THREE.Vector3();
 var current_data;
 var changed_at = 0;
 
-const apipath = "http://192.168.0.100:3000/api";
-
-function get_data() {
-  // TODO Replace with websocket
-  fetch(apipath + "/get/all").then(response => response.json()).then(response => {current_data = response});
-  return true;
-}
-
-function update_camera(p) {
-  fetch(apipath + "/update/camera?x=" + p.x + "&y=" + p.y + "&z=" + p.z);
-  return true;
-}
-
-function update_object(id, position, quaternion) {
-  fetch(apipath + "/update/position?id=" + id + "&x=" + position.x + "&y=" + position.y + "&z=" + position.z
-  + "&qx=" + quaternion.x + "&qy=" + quaternion.y + "&qz=" + quaternion.z + "&qw=" + quaternion.w);
-  return true;
-}
-
-function update_style(name, style) {
-  fetch(apipath + "/update/style?n=" + name + "&s=" + style);
-  return true;
-}
-
 function setCameraToObject(_target_vector) {
   targetVector = _target_vector;
 
@@ -490,72 +466,6 @@ function init() {
 
   }
 
-  var slideImages = [
-    textureLoader.load( "slides/slide0-fs8.png" ),
-    textureLoader.load( "slides/slide1-fs8.png" ),
-    textureLoader.load( "slides/slide2-fs8.png" ),
-    textureLoader.load( "slides/slide3-fs8.png" ),
-    textureLoader.load( "slides/slide4-fs8.png" ),
-    textureLoader.load( "slides/slide5-fs8.png" ),
-    textureLoader.load( "slides/slide6-fs8.png" ),
-    textureLoader.load( "slides/slide7-fs8.png" ),
-    textureLoader.load( "slides/slide8-fs8.png" ),
-    textureLoader.load( "slides/slide9-fs8.png" ),
-    textureLoader.load( "slides/slide10-fs8.png" ),
-    textureLoader.load( "slides/slide11-fs8.png" ),
-    textureLoader.load( "slides/slide12-fs8.png" ),
-    textureLoader.load( "slides/slide13-fs8.png" )
-  ];
-
-  const plane_geo = new THREE.PlaneGeometry( 4, 2 );
-  const dragger_geo = new THREE.BoxBufferGeometry( 0.1, 1.63, 0.003 );
-
-
-  for ( var i = 0; i < slideImages.length; i ++ ) {
-
-    const material_dragger = new THREE.MeshStandardMaterial(
-      { roughness: 0.0,
-        metalness: 0.9,
-        color: 0xC96055,
-        //envMap: textureEquirec
-        envMap: equirectMaterial.map
-      } );
-    const dragger = new THREE.Mesh(dragger_geo, material_dragger);
-    dragger.userData.id = 1000 + i;
-
-    const obj = new THREE.Mesh(
-      plane_geo,
-      new THREE.MeshBasicMaterial({
-        //premultipliedAlpha: true,
-        depthWrite: true,
-        //alphaMap: alpha_node,
-        color: 0xffffff,
-        map: slideImages[i],
-        side: THREE.DoubleSide,
-        transparent: true}));
-
-    obj.position.x = 2.05;
-    obj.position.y = 0.18;
-
-    dragger.add(obj);
-
-    dragger.position.x = -2;
-    dragger.position.y = 1;
-    dragger.position.z = -3 + -(0.07 * i);
-
-    group.add(dragger);
-
-  }
-
-
-  const camtar_geo = new THREE.SphereBufferGeometry( 0.05, 8, 8);
-  const material_group = new THREE.MeshStandardMaterial({ roughness: 0.0, metalness: 0.9, envMap: equirectMaterial.map });
-
-  var camtar_obj = new THREE.Mesh(camtar_geo, material_group);
-  camtar_obj.userData.camtar = true;
-  camtar_obj.userData.id = 10000;
-  group.add( camtar_obj );
-
   document.body.appendChild( THREE.WEBVR.createButton( renderer ) );
 
   controller1 = renderer.vr.getController( 0 );
@@ -632,22 +542,22 @@ function onSelectEnd( event ) {
 
     // EVENT HANDLING (Exclusive)
 
-    if (!CLIENT2 && typeof object.userData.id !== 'undefined') {
+    if (typeof object.userData.id !== 'undefined') {
       if (object.userData.id >= 10000 ){
         // camera
-        update_camera(object.position.clone());
+        //update_camera(object.position.clone());
       } else if (object.userData.id >= 1000) {
         // slides
-        update_object(object.userData.id, object.position.clone(), object.quaternion.clone());
+        //update_object(object.userData.id, object.position.clone(), object.quaternion.clone());
       } else {
         // styles
         // Move
-        update_object(object.userData.id, object.position.clone(), object.quaternion.clone());
+        //update_object(object.userData.id, object.position.clone(), object.quaternion.clone());
         // Check
         for(var i = 0; i < canvases.length; i++ ) {
           if (canvases[i].trigger.containsPoint(object.position)) {
             canvases[i].next = object.userData.id;
-            update_style(canvases[i].type, object.userData.id);
+            //update_style(canvases[i].type, object.userData.id);
             break;
           }
         }
@@ -749,79 +659,6 @@ function render() {
   if (elapsed - previous_clock >= 1.0 / frame_rate) {
     previous_clock = elapsed;
     // Linear.
-
-    if (CLIENT2) {
-
-      if (flip) {
-        flip = false;
-        get_data();
-      } else {
-        flip = true;
-      }
-
-      //update
-      if (current_data && changed_at != current_data.u) { // Don't drag through the ifs if there is nothing changed.
-
-        // Update Camera if it is at a different position.
-        if ( current_data.c[0] != targetVector.x || current_data.c[1] != targetVector.y || current_data.c[2] != targetVector.z ) {
-          setCameraToObject(new THREE.Vector3(current_data.c[0], current_data.c[1], current_data.c[2]));
-        }
-
-        var changeset = [];
-
-        for (const [id, d] of Object.entries(current_data.p)) {
-          if (d[0] > changed_at) {
-            changeset.push(d.slice());
-          }
-        }
-
-        // Update Objects
-        if (changeset.length > 0) {
-          for (var i = 0; i < group.children.length; i++) {
-            for (var j = 0; j < changeset.length; j++) {
-              if (group.children[i].userData.id === changeset[j][8]) {
-                group.children[i].userData.targetVector = new THREE.Vector3(changeset[j][1], changeset[j][2], changeset[j][3]);
-                group.children[i].userData.targetQuaternion = new THREE.Quaternion(changeset[j][4], changeset[j][5], changeset[j][6], changeset[j][7]);
-              }
-            }
-          }
-        }
-
-        if (Object.entries(current_data.s).length > 0) {
-          for(var i = 0; i < canvases.length; i++) {
-            if (typeof current_data.s[canvases[i].type] !== 'undefined'
-              && canvases[i].next != current_data.s[canvases[i].type]) {
-              canvases[i].next = current_data.s[canvases[i].type];
-            }
-          }
-        }
-
-        // Set changed_at after all checks!
-        changed_at = current_data.u;
-      }
-
-      // Go through each group element and lerp it to position;
-      for (var i = 0; i < group.children.length; i++) {
-        if (typeof group.children[i].userData.targetVector !== 'undefined') {
-
-          const dist = group.children[i].position.distanceTo(group.children[i].userData.targetVector);
-
-          if (dist > 0.01) {
-            var speed = 0.03;
-            if (dist <= 2) {
-              speed += (1 - dist / 2) / 5;
-            }
-            group.children[i].position.lerp(group.children[i].userData.targetVector, speed);
-            group.children[i].quaternion.slerp(group.children[i].userData.targetQuaternion, speed);
-          } else {
-            group.children[i].position.lerp(group.children[i].userData.targetVector, 1);
-            group.children[i].quaternion.slerp(group.children[i].userData.targetQuaternion, 1);
-            delete group.children[i].userData.targetVector;
-          }
-
-        }
-      }
-    }
 
     if (cube_object) {
       cube_object.rotation.x += 0.01;
