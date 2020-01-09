@@ -201,7 +201,7 @@ function init() {
   var canvas = document.createElement( 'canvas' );
   canvas.style.position = "absolute";
 
-  var context = canvas.getContext( 'webgl2', { antialias: false, alpha: false } );
+  var context = canvas.getContext( 'webgl2', { antialias: false, xrCompatible: true, alpha: false } );
   renderer = new THREE.WebGLRenderer( { canvas: canvas, context: context } );
 
   renderer.setPixelRatio( window.devicePixelRatio );
